@@ -1,0 +1,41 @@
+# Core Libraries
+langchain==0.3.25
+langchain-core==0.3.60
+langchain-community==0.3.24
+langchain-huggingface==0.2.0
+langsmith==0.3.42
+
+# Embeddings & Retrieval
+sentence-transformers==4.1.0
+chromadb==0.4.24
+rank_bm25==0.2.2
+transformers==4.51.3
+sentencepiece==0.2.0
+accelerate==0.31.0
+
+# Vector Search + Retrieval
+huggingface-hub==0.31.2
+torch==2.6.0+cu124
+scikit-learn==1.6.1
+scipy==1.15.3
+numpy==2.0.2
+
+# Bits & Bytes
+bitsandbytes==0.45.5
+
+# Text-to-Speech
+edge-tts==7.0.2
+pydub==0.25.1
+ffmpeg-python==0.2.0
+
+# FastAPI & Server
+fastapi==0.111.0
+uvicorn==0.29.0
+nest-asyncio==1.6.0
+pyngrok==7.1.0
+
+# Misc / Dependency Resolution
+python-dotenv==1.1.0
+srt==3.5.3
+typing-inspect==0.9.0
+mypy-extensions==1.1.0
