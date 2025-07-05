@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse, FileResponse
-from app.vector_access import initialize_vector_db, extract_documents, build_ensemble_retriever
-from app.summarizer import summarize, generate_script, synthesize_podcast
+from vector_access import initialize_vector_db, extract_documents, build_ensemble_retriever
+from summarizer import summarize, generate_script, synthesize_podcast
 import asyncio, os
-from app.shared_config import PODCAST_AUDIO_DIR
+from shared_config import PODCAST_AUDIO_DIR
 
 app = FastAPI()
 

@@ -1,7 +1,7 @@
 # app/summarizer.py
 
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-from app.shared_config import HF_TOKEN, LLaMA_MODEL_NAME, PODCAST_AUDIO_DIR
+from shared_config import HF_TOKEN, LLaMA_MODEL_NAME, PODCAST_AUDIO_DIR
 import edge_tts, os, asyncio
 from datetime import datetime
 from pydub import AudioSegment

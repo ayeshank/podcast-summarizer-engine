@@ -2,7 +2,7 @@ from langchain_community.vectorstores import Chroma
 from langchain.retrievers import BM25Retriever, EnsembleRetriever
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
-from app.shared_config import CHROMA_PERSIST_DIR, EMBED_MODEL_NAME
+from shared_config import CHROMA_PERSIST_DIR, EMBED_MODEL_NAME
 
 def initialize_vector_db() -> Chroma:
     embedding_model = HuggingFaceEmbeddings(model_name=EMBED_MODEL_NAME)
