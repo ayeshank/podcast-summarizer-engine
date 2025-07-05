@@ -1,2 +1,2 @@
-cd /home/ubuntu/podcast-summarizer-api
+cd /home/ubuntu/podcast-summarizer-engine
 uvicorn app.fastapi_news_bot:app --host 0.0.0.0 --port 8000 --reload
