@@ -15,7 +15,7 @@ accelerate==0.31.0
 
 # Vector Search + Retrieval
 huggingface-hub==0.31.2
-torch==2.6.0+cu124
+torch
 scikit-learn==1.6.1
 scipy==1.15.3
 numpy==2.0.2
