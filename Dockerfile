@@ -1,20 +1,18 @@
-# Use GPU-compatible base
 FROM pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
 
-# Install dependencies
-RUN apt-get update && apt-get install -y ffmpeg git && \
-    pip install --upgrade pip
+# Install system dependencies
+RUN apt-get update && apt-get install -y ffmpeg git curl && rm -rf /var/lib/apt/lists/*
 
+# Set workdir and install Python dependencies
 WORKDIR /app
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy all files
+# Copy app source
 COPY . .
 
-# Install requirements
-RUN pip install -r requirements.txt
-
-# Expose port
+# Expose port (optional for Hugging Face)
 EXPOSE 7860
 
-# Launch FastAPI (adjust if your entrypoint is different)
-CMD ["uvicorn", "fastapi_news_bot:app", "--host", "0.0.0.0", "--port", "7860"]
+# Entry point script
+CMD ["bash", "start_server.sh"]
