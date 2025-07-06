@@ -37,3 +37,8 @@ def get_audio(filename: str):
     if not os.path.exists(file_path):
         return JSONResponse(status_code=404, content={"message": "File not found."})
     return FileResponse(file_path, media_type="audio/mpeg")
+
+@app.get("/gpu")
+def check_gpu():
+    import torch
+    return {"cuda_available": torch.cuda.is_available()}
