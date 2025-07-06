@@ -4,6 +4,7 @@ langchain-core==0.3.60
 langchain-community==0.3.24
 langchain-huggingface==0.2.0
 langsmith==0.3.42
+langchain-chroma
 
 # Embeddings & Retrieval
 sentence-transformers==4.1.0
