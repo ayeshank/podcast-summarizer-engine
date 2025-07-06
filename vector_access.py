@@ -1,5 +1,7 @@
 from langchain_chroma import Chroma
-from langchain.retrievers import BM25Retriever, EnsembleRetriever
+# from langchain.retrievers import BM25Retriever, EnsembleRetriever
+from langchain_community.retrievers import BM25Retriever
+from langchain.retrievers import EnsembleRetriever
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from shared_config import CHROMA_PERSIST_DIR, EMBED_MODEL_NAME
