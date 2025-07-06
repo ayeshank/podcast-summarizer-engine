@@ -3,16 +3,43 @@ from shared_config import HF_TOKEN, LLaMA_MODEL_NAME, PODCAST_AUDIO_DIR
 import edge_tts, os, asyncio
 from datetime import datetime
 from pydub import AudioSegment
+import torch
 
-# ====== ✅ Load the model and tokenizer ONCE globally ======
-tokenizer = AutoTokenizer.from_pretrained(LLaMA_MODEL_NAME, token=HF_TOKEN)
+# # ====== ✅ Load the model and tokenizer ONCE globally ======
+# tokenizer = AutoTokenizer.from_pretrained(LLaMA_MODEL_NAME, token=HF_TOKEN)
+# model = AutoModelForCausalLM.from_pretrained(
+#     LLaMA_MODEL_NAME,
+#     torch_dtype="auto",
+#     device_map="auto",
+#     token=HF_TOKEN
+# )
+# pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+# Use float16 and enable safe GPU use
 model = AutoModelForCausalLM.from_pretrained(
     LLaMA_MODEL_NAME,
-    torch_dtype="auto",
+    token=HF_TOKEN,
+    torch_dtype=torch.float16,
     device_map="auto",
-    token=HF_TOKEN
+    low_cpu_mem_usage=True,
+    trust_remote_code=True
 )
-pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+tokenizer = AutoTokenizer.from_pretrained(
+    LLaMA_MODEL_NAME,
+    token=HF_TOKEN,
+    trust_remote_code=True
+)
+
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+
+pipe = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer
+)
+
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 # ===========================================================
