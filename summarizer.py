@@ -3,6 +3,7 @@ from shared_config import HF_TOKEN, LLaMA_MODEL_NAME, PODCAST_AUDIO_DIR
 import edge_tts, os, asyncio
 from datetime import datetime
 from pydub import AudioSegment
+from transformers import BitsAndBytesConfig
 import torch
 
 # # ====== ✅ Load the model and tokenizer ONCE globally ======
@@ -15,13 +16,18 @@ import torch
 # )
 # pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
 
-# Use float16 and enable safe GPU use
+quant_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.float16,
+)
+
 model = AutoModelForCausalLM.from_pretrained(
     LLaMA_MODEL_NAME,
     token=HF_TOKEN,
-    torch_dtype=torch.float16,
+    quantization_config=quant_config,
     device_map="auto",
-    low_cpu_mem_usage=True,
     trust_remote_code=True
 )
 
@@ -39,6 +45,7 @@ pipe = pipeline(
     model=model,
     tokenizer=tokenizer
 )
+
 
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
