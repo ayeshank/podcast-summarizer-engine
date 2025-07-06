@@ -5,47 +5,19 @@ from datetime import datetime
 from pydub import AudioSegment
 from transformers import BitsAndBytesConfig
 import torch
+import boto3
+from io import BytesIO
+from shared_config import S3_BUCKET, S3_PODCASTS
 
 # # ====== ✅ Load the model and tokenizer ONCE globally ======
-# tokenizer = AutoTokenizer.from_pretrained(LLaMA_MODEL_NAME, token=HF_TOKEN)
-# model = AutoModelForCausalLM.from_pretrained(
-#     LLaMA_MODEL_NAME,
-#     torch_dtype="auto",
-#     device_map="auto",
-#     token=HF_TOKEN
-# )
-# pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
-
-quant_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.float16,
-)
-
+tokenizer = AutoTokenizer.from_pretrained(LLaMA_MODEL_NAME, token=HF_TOKEN)
 model = AutoModelForCausalLM.from_pretrained(
     LLaMA_MODEL_NAME,
-    token=HF_TOKEN,
-    quantization_config=quant_config,
+    torch_dtype="auto",
     device_map="auto",
-    trust_remote_code=True
+    token=HF_TOKEN
 )
-
-tokenizer = AutoTokenizer.from_pretrained(
-    LLaMA_MODEL_NAME,
-    token=HF_TOKEN,
-    trust_remote_code=True
-)
-
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
-
-pipe = pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer
-)
-
+pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
 
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
@@ -87,13 +59,31 @@ def generate_script(summary: str) -> str:
     """
     return pipe(prompt, max_new_tokens=1000, return_full_text=False, do_sample=False)[0]["generated_text"]
 
+# async def synthesize_podcast(script: str):
+#     os.makedirs(PODCAST_AUDIO_DIR, exist_ok=True)
+#     lines = [("Ayesha", "en-US-AvaMultilingualNeural", t.strip()) if "Ayesha:" in t else 
+#              ("Sam", "en-US-AndrewMultilingualNeural", t.strip()) for t in script.split("\n") if ":" in t]
+
+#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     output_file = os.path.join(PODCAST_AUDIO_DIR, f"podcast_{timestamp}.mp3")
+
+#     tasks = [edge_tts.Communicate(text=t, voice=v).save(f"line_{i}.mp3") for i, (_, v, t) in enumerate(lines)]
+#     await asyncio.gather(*tasks)
+
+#     combined = AudioSegment.silent(duration=500)
+#     for i in range(len(lines)):
+#         combined += AudioSegment.from_file(f"line_{i}.mp3") + AudioSegment.silent(duration=500)
+#         os.remove(f"line_{i}.mp3")
+
+#     combined.export(output_file, format="mp3")
+#     return os.path.basename(output_file)
+
 async def synthesize_podcast(script: str):
-    os.makedirs(PODCAST_AUDIO_DIR, exist_ok=True)
     lines = [("Ayesha", "en-US-AvaMultilingualNeural", t.strip()) if "Ayesha:" in t else 
              ("Sam", "en-US-AndrewMultilingualNeural", t.strip()) for t in script.split("\n") if ":" in t]
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = os.path.join(PODCAST_AUDIO_DIR, f"podcast_{timestamp}.mp3")
+    filename = f"podcast_{timestamp}.mp3"
 
     tasks = [edge_tts.Communicate(text=t, voice=v).save(f"line_{i}.mp3") for i, (_, v, t) in enumerate(lines)]
     await asyncio.gather(*tasks)
@@ -103,5 +93,13 @@ async def synthesize_podcast(script: str):
         combined += AudioSegment.from_file(f"line_{i}.mp3") + AudioSegment.silent(duration=500)
         os.remove(f"line_{i}.mp3")
 
-    combined.export(output_file, format="mp3")
-    return os.path.basename(output_file)
+    # Save to BytesIO buffer
+    buffer = BytesIO()
+    combined.export(buffer, format="mp3")
+    buffer.seek(0)
+
+    # Upload to S3
+    s3 = boto3.client("s3")
+    s3.upload_fileobj(buffer, S3_BUCKET, f"{S3_PODCASTS}{filename}")
+
+    return filename

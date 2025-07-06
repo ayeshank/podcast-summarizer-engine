@@ -5,8 +5,17 @@ from vector_access import initialize_vector_db, extract_documents, build_ensembl
 from summarizer import summarize, generate_script, synthesize_podcast
 import asyncio, os
 from shared_config import PODCAST_AUDIO_DIR
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or set to ["https://your-frontend.com"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class QueryInput(BaseModel):
     query: str
